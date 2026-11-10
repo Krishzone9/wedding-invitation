@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, type Variants } from 'framer-motion'
 import {
   ArrowDown, ArrowUpRight, CalendarDays, Check, ChevronLeft, ChevronRight,
   Clock3, Flower2, Heart, MapPin, Menu, Music2, Pause, Play, Send, Volume2, VolumeX, X
@@ -31,27 +31,27 @@ const gallery = [
 ]
 
 /* ─── animation variants ─── */
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 50 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
 }
-const fadeDown = {
+const fadeDown: Variants = {
   hidden: { opacity: 0, y: -40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } },
 }
-const fadeLeft = {
+const fadeLeft: Variants = {
   hidden: { opacity: 0, x: -60 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: 'easeOut' } },
 }
-const fadeRight = {
+const fadeRight: Variants = {
   hidden: { opacity: 0, x: 60 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: 'easeOut' } },
 }
-const scaleIn = {
+const scaleIn: Variants = {
   hidden: { opacity: 0, scale: 0.85 },
   visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: 'easeOut' } },
 }
-const stagger = {
+const stagger: Variants = {
   visible: { transition: { staggerChildren: 0.15 } },
 }
 
@@ -60,7 +60,7 @@ function AnimatedSection({ children, className, id, variants = fadeUp, ...rest }
   children: React.ReactNode
   className?: string
   id?: string
-  variants?: typeof fadeUp
+  variants?: Variants
   [key: string]: any
 }) {
   const ref = useRef(null)
@@ -83,14 +83,23 @@ function AnimatedSection({ children, className, id, variants = fadeUp, ...rest }
 function AnimatedDiv({ children, className, variants = fadeUp, delay = 0, ...rest }: {
   children: React.ReactNode
   className?: string
-  variants?: typeof fadeUp
+  variants?: Variants
   delay?: number
   [key: string]: any
 }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-60px' })
-  const v = delay > 0
-    ? { ...variants, visible: { ...variants.visible, transition: { ...((variants.visible as any).transition || {}), delay } } }
+  const v: Variants = delay > 0
+    ? {
+        ...variants,
+        visible: {
+          ...(typeof variants?.visible === 'object' ? variants.visible : {}),
+          transition: {
+            ...((typeof variants?.visible === 'object' && (variants.visible as any)?.transition) || {}),
+            delay
+          }
+        }
+      }
     : variants
   return (
     <motion.div ref={ref} className={className} initial="hidden" animate={isInView ? 'visible' : 'hidden'} variants={v} {...rest}>
